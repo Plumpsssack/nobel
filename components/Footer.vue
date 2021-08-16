@@ -1,7 +1,7 @@
 <template>
   <div class="w-full h-32 flex flex-row">
     <p class="m-2 mt-5 text-gray-500">
-      © {{ new Date().getFullYear() }} TDFK. All rights reserved.
+      © {{ new Date().getFullYear() }} Nobel. All rights reserved.
     </p>
     <div class="flex-grow"></div>
 

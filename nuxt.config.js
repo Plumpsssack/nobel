@@ -35,8 +35,11 @@ export default {
   ** Plugins to load before mounting the App
   */
   plugins: [
-    "~/plugins/draggable",
+    "~/plugins/main",
+    "~/plugins/custom/directives/appear",
+    "~/plugins/custom/directives/scrollby",
     "~/plugins/font-awesome-filter"
+
   ],
   components: true,
   /*

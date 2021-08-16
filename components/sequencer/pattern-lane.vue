@@ -5,7 +5,7 @@
       <div
         v-for="cell in cellCount"
         :key="'pattern-cell_' + cell"
-        class="pattern-cell bg-primary rounded"
+        class="pattern-cell bg-fourth rounded"
         v-droppable="{ onHover: onCellHover.bind(this, cell) }"
       ></div>
       <div
@@ -17,7 +17,7 @@
           onStop: onDragStop.bind(this, track),
         }"
         :class="[
-          'bg-secondary',
+          'bg-primary',
           'track',
           'rounded',
           'bg-nobel-cover',
@@ -39,7 +39,7 @@
         </div>
       </div>
       <div
-        class="bg-third track ghost-track rounded"
+        class="bg-primary track ghost-track rounded opacity-80"
         :style="trackStyle(ghostTrack)"
       ></div>
     </div>
@@ -350,6 +350,7 @@ $size: 94px;
 
 .line {
   height: $size;
+
   margin-bottom: 4px;
 
   .line-header {

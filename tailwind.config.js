@@ -2,6 +2,7 @@ module.exports = {
   purge: [],
   darkMode: false, // or 'media' or 'class'
   theme: {
+
     extend: {
       // colors: {
       //   primary: '#d59237',
@@ -15,11 +16,15 @@ module.exports = {
       // },
       colors: {
 
-        primary: '#D9779B',
-        secondary: '#7BE0AD',
+        // primary: '#D9779B',
+        // primary: '#ed832f',
+        // secondary: '#7BE0AD',
+
+        primary: '#ed832f',
+        secondary: '#fffcf7ff',
         third: '#AEE5D8',
         fourth: '#E7E5E5',
-
+        // 
         // secondary: '#507346',
         // third: '#BF454F',
         // fourth: '#BF988A',
@@ -30,7 +35,7 @@ module.exports = {
         // third: '#820263ff',
         // fourth: '#336699ff',
         white: '#fffcf7ff',
-        // white: '#fffcf7ff',
+
         'primary-gray': {
           'light': '#ceccc9',
           'normal': '#848485',
@@ -38,6 +43,7 @@ module.exports = {
         }
       },
       backgroundImage: theme => ({
+        'nobel-bass': "url('~/assets/img/nobel_bass.jpg')",
         'nobel-cover': "url('~/assets/img/nobel_background.jpg')"
 
       })

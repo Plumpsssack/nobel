@@ -25,7 +25,6 @@ export default {
     return {
       audioContext: null,
       tempo: 86 / 4, // Every sample includes 4 bars
-      sampleArray: ['Lig_Bass.wav', 'Pre_Guit1.wav'],
       sampleDir: 'samples',
       sampleBufferMap: new Map(),
       lookahead: 25.0, // How frequently to call scheduling function (in milliseconds)

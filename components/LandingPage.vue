@@ -1,22 +1,22 @@
 <template>
-  <div class="flex justify-center mt-10">
-   <object data="images/Heart.svg" type="image/svg+xml" class="w-1/2"></object>
+  <div>
+    <div class="flex justify-center -mt-20">
+      <h1 class="font-extrabold text-primary logo">Nobel</h1>
+    </div>
+
+    <sequencer-section></sequencer-section>
   </div>
 </template>
 
 <script>
-  export default {
-    head() {
-    }
-  }
+import SequencerSection from './sections/sequencer-section.vue'
+export default {
+  components: { SequencerSection },
+  head() {},
+}
 </script>
 
 <style lang="scss">
-.heart-part1{
-	animation: scale-up-center 0.9s cubic-bezier(0.390, 0.575, 0.565, 1.000) infinite alternate both;
-}
-
-
 @keyframes scale-up-center {
   0% {
     transform: scale(0.5);
@@ -25,6 +25,9 @@
     transform: scale(1);
   }
 }
-
-
+.logo {
+  margin-bottom: 50vh;
+  margin-top: 50vh;
+  font-size: 15rem;
+}
 </style>
