@@ -127,7 +127,7 @@ export default {
       const secondsPerBeat = 60.0 / this.tempo
 
       this.nextNoteTime += secondsPerBeat // Add beat length to last beat time
-
+      this.$emit('nextNote', this.currentNote)
       this.currentNote++
       if (this.currentNote == this.notesCount) {
         this.currentNote = 0
@@ -173,6 +173,7 @@ export default {
         this.nextNoteTime = this.audioContext.currentTime
         this.scheduler()
       } else {
+        this.$emit('nextNote', 0)
         clearTimeout(this.timerId)
       }
     },

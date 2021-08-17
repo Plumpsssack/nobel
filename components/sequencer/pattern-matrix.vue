@@ -3,8 +3,20 @@
     <webaudio-api-controller
       :steps="steps"
       @patternLengthChange="onPatternLengthChange"
+      @nextNote="onNextNote"
       :patternLength="patternLength"
     ></webaudio-api-controller>
+
+    <div class="flex mb-3">
+      <div style="margin-left: 200px">
+        <div
+          class="rounded-full w-2 h-2 bg-primary transition-all transition-1"
+          :style="{
+            transform: 'translateX(' + (currentNote * 98 + 98 / 2) + 'px)',
+          }"
+        ></div>
+      </div>
+    </div>
     <pattern-lane
       v-for="(step, index) in steps"
       :key="'step_' + index"
@@ -26,6 +38,7 @@ export default {
   data() {
     return {
       patternLength: 8,
+      currentNote: 0,
       steps: [
         {
           id: 0,
@@ -170,6 +183,12 @@ export default {
     },
     onPatternLengthChange(patternLength) {
       this.patternLength = patternLength
+    },
+
+    onNextNote(note) {
+      this.currentNote = note
+
+      console.log(this.currentNote)
     },
   },
 }
