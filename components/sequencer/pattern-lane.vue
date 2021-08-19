@@ -28,6 +28,19 @@
           { 'track-dragging': track == currentTrack },
         ]"
         :style="trackStyle(track)"
+        v-scrollby="{
+          offset: 180 + index * 10,
+          styleAttributes: [
+            {
+              prop: 'transform',
+              value: 'translate($value%,$value%)',
+              reverse: true,
+              factor: -1,
+            },
+
+            { prop: 'opacity', factor: 0.01 },
+          ],
+        }"
       >
         <div>
           <div class="text-center">
@@ -85,9 +98,6 @@ export default {
       return this.typeImgPosMap.get(this.type).icon
     },
   },
-  // created() {
-  //   this.typeImgPosMap.add()
-  // },
   methods: {
     trackTitle(track) {
       return track.src.replace('.wav', '')

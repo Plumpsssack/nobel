@@ -15,7 +15,10 @@ export default {
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }, {
       rel: "stylesheet",
       href: "https://fonts.googleapis.com/css2?family=Montserrat&display=swap"
-    }],
+    }, {
+      rel: "stylesheet",
+      href: "https://fonts.googleapis.com/css2?family=Courgette&family=Kaushan+Script&family=Poiret+One&family=WindSong:wght@500&display=swap"
+    },],
   },
   /*
   ** Customize the progress-bar color

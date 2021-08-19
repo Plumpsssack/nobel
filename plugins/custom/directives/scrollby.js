@@ -2,8 +2,8 @@
 import Vue from "vue";
 
 const checkAppearance = (elm, args) => {
-    const appearance = getAppearance(elm, args.offset, args.max);
 
+    const appearance = getAppearance(elm, args.offset, args.topOutMode, args.max);
 
     let change = false;
 
@@ -24,7 +24,8 @@ const checkAppearance = (elm, args) => {
                 if (attribute.factor) {
                     value *= attribute.factor;
                 }
-                const valueString = attribute.value ? attribute.value.replace("$value", value) : value;
+                const valueString = attribute.value ? attribute.value.replaceAll("$value", value) : value;
+
 
                 elm.style[attribute.prop] = valueString
 
@@ -46,12 +47,21 @@ const checkAppearance = (elm, args) => {
 }
 
 
-const getAppearance = (elm, offset, max = 100) => {
+const getAppearance = (elm, offset = 0, topOutMode, max = 100) => {
     var rect = elm.getBoundingClientRect();
     var viewHeight = Math.max(
         document.documentElement.clientHeight,
         window.innerHeight
     );
+    if (topOutMode) {
+
+        // This means that the element is out of the viewport (top direction)
+        if (rect.top - offset < 0) {
+            return Math.max(rect.height + rect.top - offset, 0) / rect.height * 100;
+        }
+        return max;
+
+    }
 
     if (rect.bottom < 0) return 0;
 
@@ -68,8 +78,23 @@ Vue.directive("scrollby", {
         checkAppearance(el, binding.value);
     },
     bind(el, binding) {
+
+        // binding.value = {
+        //     topOutMode: {
+        //         type: bool,
+        //         description: "triggers when the element starts to disappear on top ",
+        //         default: false
+        //     }
+        // };
+
+
         binding.def.scrollEvent = checkAppearance.bind(this, el, binding.value);
+
         window.addEventListener("scroll", binding.def.scrollEvent);
         window.addEventListener("resize", binding.def.scrollEvent);
+    },
+    unbind(el, binding) {
+        window.removeEventListener("scroll", binding.def.scrollEvent);
+        window.removeEventListener("resize", binding.def.scrollEvent);
     }
 })
