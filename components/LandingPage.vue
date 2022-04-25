@@ -7,7 +7,8 @@
             :class="['font-extrabold text-primary logo']"
             style="font-family: 'Courgette'"
           >
-            Nobel
+            <img src="nobel_logo_orange.png" class="max-w-6xl" />
+            <!-- Nobel -->
           </h1>
           <a
             href="#sequencer-section"
@@ -58,17 +59,17 @@ export default {
           //   reverse: true,
           // },
         ],
-        changeFunc: function (percent) {
-          console.log(percent)
-        },
+        // changeFunc: function (percent) {
+        //   console.log(percent)
+        // },
         offset: 200,
       },
     }
   },
   methods: {
-    onNobelHeaderScroll(percent) {
-      console.log('NobelHeaderScrioll', percent)
-    },
+    // onNobelHeaderScroll(percent) {
+    //   console.log('NobelHeaderScrioll', percent)
+    // },
     onScrollDownClick() {},
   },
 }

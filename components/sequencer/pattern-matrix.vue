@@ -141,7 +141,7 @@ export default {
         {
           id: 4,
           title: 'Voc 1',
-          type: 'voc',
+          type: 'vox',
           tracks: [
             {
               title: 'Variant 1',
@@ -188,7 +188,7 @@ export default {
     onNextNote(note) {
       this.currentNote = note
 
-      console.log(this.currentNote)
+      // console.log(this.currentNote)
     },
   },
 }

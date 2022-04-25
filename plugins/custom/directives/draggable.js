@@ -323,6 +323,8 @@ const dragMove = (
   }
 };
 
+
+/** Be sure to set the parent tag to 'position:relative' */
 const draggable = {
   bind(el, binding, vnode) {
     el.ondragstart = function () {

@@ -13,7 +13,7 @@
         changeFunc: scrollChange.bind(this),
       }"
     ></sequencer>
-    <div
+    <track-selector
       :class="['bg-secondary p-10 w-full mr-10 mt-0 mb-60 rounded ']"
       v-scrollby="{
         offset: 100,
@@ -28,13 +28,15 @@
         ],
         changeFunc: scrollPartSelectionChange.bind(this),
       }"
-    ></div>
+    ></track-selector>
   </div>
 </template>
    <script>
 import Sequencer from '../sequencer'
+import TrackSelector from '../track-selector'
+
 export default {
-  components: { Sequencer },
+  components: { Sequencer, TrackSelector },
   data() {
     return {
       inViewPort: false,

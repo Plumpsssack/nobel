@@ -8,26 +8,18 @@
         class="pattern-cell bg-fourth rounded"
         v-droppable="{ onHover: onCellHover.bind(this, cell) }"
       ></div>
-      <div
+      <Track
         v-for="(track, index) in currentTracks"
+        :track="track"
+        :type="type"
         :key="'track_' + track.id"
         v-draggable="{
           boundaries: { leftStart: 0, leftEnd: '100%' },
           onStart: onDragStart.bind(this, track),
           onStop: onDragStop.bind(this, track),
         }"
-        :class="[
-          'bg-primary',
-          'track',
-          'rounded',
-          'bg-nobel-cover',
-          'flex',
-          'items-center',
-          'justify-center',
-          'text-secondary',
-          { 'track-dragging': track == currentTrack },
-        ]"
         :style="trackStyle(track)"
+        :class="{ 'track-dragging': track == currentTrack }"
         v-scrollby="{
           offset: 180 + index * 10,
           styleAttributes: [
@@ -41,16 +33,8 @@
             { prop: 'opacity', factor: 0.01 },
           ],
         }"
-      >
-        <div>
-          <div class="text-center">
-            <fa :icon="trackIcon | fa" style="font-size: 30px"></fa>
-          </div>
-          <div>
-            {{ trackTitle(track) }}
-          </div>
-        </div>
-      </div>
+      />
+
       <div
         class="bg-primary track ghost-track rounded opacity-80"
         :style="trackStyle(ghostTrack)"
@@ -60,13 +44,18 @@
 </template>
 <script>
 import { library } from '@fortawesome/fontawesome-svg-core'
+import TrackCategoryMixin from '@/assets/js/mixins/track-category.js'
+import Track from './../track-selector/track.vue'
 import {
   faDrum,
   faGuitar,
   faMicrophoneAlt,
 } from '@fortawesome/free-solid-svg-icons'
+
 library.add(faDrum, faGuitar, faMicrophoneAlt)
 export default {
+  components: { Track },
+  mixins: [TrackCategoryMixin],
   props: {
     title: String,
     type: String,
@@ -81,27 +70,14 @@ export default {
       currentTrack: null,
       currentTracks: [],
       movingWorks: true,
-      typeImgPosMap: new Map([
-        ['bass', { x: 202, icon: 'guitar' }],
-        ['drums', { x: 402, icon: 'drum' }],
-        ['guitar', { x: 300, icon: 'guitar' }],
-        ['sax', { x: 602, y: 402, icon: 'sax-hot' }],
-        ['voc', { x: 602, y: 402, icon: 'microphone-alt' }],
-      ]),
     }
   },
   computed: {
     cellCount() {
       return this.patternLength
     },
-    trackIcon() {
-      return this.typeImgPosMap.get(this.type).icon
-    },
   },
   methods: {
-    trackTitle(track) {
-      return track.src.replace('.wav', '')
-    },
     trackStyle(track) {
       if (!track) return
 
@@ -116,16 +92,6 @@ export default {
           'px',
       }
 
-      const imgPos = this.typeImgPosMap.get(this.type)
-
-      if (imgPos) {
-        if (imgPos.x) {
-          style['background-position-x'] = imgPos.x + 'px'
-        }
-        if (imgPos.y) {
-          style['background-position-y'] = imgPos.y + 'px'
-        }
-      }
       return style
     },
     onDragStart(track, evt) {
@@ -143,6 +109,7 @@ export default {
       }
     },
     onDragStop(track, evt) {
+      console.log('here', this.movingWorks, this.ghostTrack)
       if (!this.movingWorks || !this.ghostTrack) {
         // Reset
         this.mapTracks()
@@ -171,6 +138,7 @@ export default {
     },
 
     onCellHover(cell, evt) {
+      console.log('hey')
       const track = evt.startParams.track
       const type = evt.startParams.type
       // we have to know whicht part of the Track is currently dragged
@@ -187,16 +155,17 @@ export default {
           })
 
         let start = cell - 1 - relativePart // -1 because its zero based
+        const trackLength = track.length || 1
 
-        if (start > this.cellCount - track.length) {
-          start = this.cellCount - track.length
+        if (start > this.cellCount - trackLength) {
+          start = this.cellCount - trackLength
         }
         if (start < 0) start = 0
 
         // Check if Track is of the same Track Type
         // e.g. it is only allowed to drag a Bass Track into Bass Type Lane
         if (this.type == type) {
-          const end = start + track.length
+          const end = start + trackLength
 
           //Overlapping
           let overlapping = this.currentTracks.filter(
