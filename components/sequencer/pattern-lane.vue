@@ -86,8 +86,9 @@ export default {
       return this.patternLength
     },
     attentionClass() {
-      // console.log(this.instrument,this.currentInstrumentId)
-      return this.currentInstrumentId == this.instrument?.id
+      return (
+        this.currentInstrumentId == this.instrument?.id || this.currentTrack
+      )
     },
   },
   methods: {
@@ -109,7 +110,7 @@ export default {
     },
     onDragStart(track, evt) {
       this.currentTrack = track
-      this.$store.dispatch('tracks/setCurrentInstrumentId', this.instrument.id)
+      // this.$store.dispatch('tracks/setCurrentInstrumentId', this.instrument.id)
 
       const clientWidth = evt.el.clientWidth
       const mousePosX = evt.dragClickPositionX
@@ -125,6 +126,7 @@ export default {
     onDragStop(track, evt) {
       if (!this.movingWorks || !this.ghostTrack) {
         // Reset
+
         this.mapTracks()
         return
       }
@@ -143,10 +145,10 @@ export default {
 
       // Track has to be refreshed, otherwise it would stay at the old position
       if (refresh) {
-        track.start = (start + 1) % this.cellCount
-        this.$nextTick(() => {
-          this.currentTracks.filter((x) => x.id == track.id)[0].start = start
-        })
+        // track.start = (start + 1) % this.cellCount
+        // this.$nextTick(() => {
+        //   this.currentTracks.filter((x) => x.id == track.id)[0].start = start
+        // })
       }
     },
 
@@ -184,8 +186,6 @@ export default {
         let overlapping = this.currentTracks.filter(
           (x) => x.start < end && x.start + x.length > start && x != track
         )
-
-        console.log('overlapping', overlapping)
 
         const leftTracks = this.currentTracks.filter(
           (x) => x.start + x.length <= start && x.id != track.id
