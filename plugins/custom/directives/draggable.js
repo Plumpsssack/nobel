@@ -208,6 +208,7 @@ const dragStop = async (
     startParams
   );
 
+
   lastCurrentDroppable = null;
 
   const stopParams = { el, left: el.style.left, top: el.style.top };

@@ -23,23 +23,25 @@
   </div>
 </template>
 <script>
-import TrackCategoryMixin from '@/assets/js/mixins/track-category.js'
+import InstrumentsMixin from '~/assets/js/mixins/instruments.js'
 
 export default {
   props: {
     track: Object,
-    type: String,
   },
-  mixins: [TrackCategoryMixin],
+  mixins: [InstrumentsMixin],
   computed: {
     trackIcon() {
-      return this.typeImgPosMap.get(this.type).icon
+      return this.instrument.icon.src
     },
     style() {
-      return this.getCategoryImgStyle(this.type)
+      return this.getInstrumentImgStyle(this.instrument)
     },
     trackTitle() {
       return this.track.src.replace('.wav', '')
+    },
+    instrument() {
+      return this.getInstrumentOfTrack(this.track)
     },
   },
 }

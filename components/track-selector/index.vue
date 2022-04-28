@@ -44,11 +44,9 @@
         <Track
           v-draggable="{
             onStart: onDragStart.bind(this, track),
-            onStop: onDragStop.bind(this, track),
           }"
           class="mx-2 mb-3"
           :track="track"
-          :type="currentCategory.title"
           :index="index"
         />
       </div>
@@ -59,143 +57,99 @@
       enter-active-class="enter-right"
       @after-leave="onAfterCategoriesLeave"
     >
-      <track-category
+      <track-instrument
         class="mb-3"
-        v-for="(category, index) in currentCategories"
-        :key="'category' + index"
-        :category="category"
+        v-for="(instrument, index) in currentInstruments"
+        :key="'instrument' + index"
+        :instrument="instrument"
         :index="index"
-        @click="onCategoryClick(category)"
-      ></track-category>
+        @click="onInstrumentClick(instrument)"
+      ></track-instrument>
     </transition-group>
   </div>
 </template>
 
 <script>
-import TrackCategory from './track-category.vue'
+import TrackInstrument from './track-instrument.vue'
 import Track from './track.vue'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faChevronCircleLeft } from '@fortawesome/free-solid-svg-icons'
+import InstrumentsMixin from '~/assets/js/mixins/instruments.js'
 
 library.add(faChevronCircleLeft)
 export default {
   components: {
-    TrackCategory,
+    TrackInstrument,
     Track,
   },
+  mixins: [InstrumentsMixin],
   data() {
     return {
       docState: 'saved',
-      currentCategories: [],
+      currentInstruments: [],
       currentTracks: [],
       categoriesDisappeared: false,
 
-      currentCategory: null,
+      currentInstrument: null,
       leaveCounter: 0,
-
-      categories: [
-        {
-          title: 'bass',
-          tracks: [
-            {
-              id: 1,
-              src: 'Lig_Bass.wav',
-              length: 1,
-            },
-            {
-              id: 2,
-              src: 'Pre_Bass.wav',
-            },
-            {
-              id: 3,
-              src: 'Lig_Bass.wav',
-            },
-            {
-              id: 4,
-              src: 'Pre_Bass.wav',
-            },
-            {
-              id: 5,
-              src: 'Lig_Bass.wav',
-            },
-            {
-              id: 6,
-              src: 'Pre_Bass.wav',
-            },
-          ],
-        },
-        {
-          title: 'vox',
-        },
-        {
-          title: 'sax',
-        },
-        { title: 'guitar' },
-        { title: 'drums' },
-      ],
     }
   },
   methods: {
-    async onCategoryClick(category) {
-      this.currentCategory = category
-      while (this.currentCategories.length > 0) {
-        this.currentCategories.pop()
+    async onInstrumentClick(instrument) {
+      this.currentInstrument = instrument
+
+      this.$store.dispatch('tracks/setCurrentInstrumentId', instrument.id)
+
+      while (this.currentInstruments.length > 0) {
+        this.currentInstruments.pop()
         await new Promise((resolve) => setTimeout(resolve, 100))
       }
-
-      //   this.currentTracks = [...category.tracks]
-      //   await new Promise((resolve) => setTimeout(resolve, 400))
-      //   this.categoriesDisappeared = true
     },
     async onBackClick() {
       while (this.currentTracks.length > 0) {
         this.currentTracks.pop()
         await new Promise((resolve) => setTimeout(resolve, 100))
       }
-
-      //   this.currentCategories = [...this.categories]
-      //   this.categoriesDisappeared = false
+      this.$store.dispatch('tracks/setCurrentInstrumentId', null)
     },
     async onAfterTracksLeave() {
       this.leaveCounter++
 
-      if (this.currentCategory.tracks.length === this.leaveCounter) {
+      if (this.currentInstrument.tracks.length === this.leaveCounter) {
         this.leaveCounter = 0
-        for (let i = 0; i < this.categories.length; i++) {
-          this.currentCategories.push(this.categories[i])
+        for (let i = 0; i < this.instruments.length; i++) {
+          this.currentInstruments.push(this.instruments[i])
           await new Promise((resolve) => setTimeout(resolve, 100))
         }
       }
-      //   this.currentCategories = [...this.categories]
     },
     async onAfterCategoriesLeave() {
       this.leaveCounter++
 
-      if (this.categories.length === this.leaveCounter) {
+      if (this.instruments.length === this.leaveCounter) {
         this.leaveCounter = 0
-        // await new Promise((resolve) => setTimeout(resolve, 400))
+
         this.categoriesDisappeared = true
 
-        for (let i = 0; i < this.currentCategory.tracks.length; i++) {
-          this.currentTracks.push(this.currentCategory.tracks[i])
+        for (let i = 0; i < this.currentInstrument.tracks.length; i++) {
+          this.currentTracks.push(this.currentInstrument.tracks[i])
           await new Promise((resolve) => setTimeout(resolve, 100))
         }
       }
     },
     onDragStart(track) {
+      const instrument = this.getInstrumentOfTrack(track)
+
       return {
         relativePart: 0,
         newTrack: true,
         track,
-        type: this.currentCategory.title,
+        instrumentId: instrument.id,
       }
-    },
-    onDragStop(track) {
-      this.$emit('trackDragStop', track)
     },
   },
   mounted() {
-    this.currentCategories = [...this.categories]
+    this.currentInstruments = [...this.instruments]
   },
 }
 </script>

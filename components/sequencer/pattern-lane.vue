@@ -5,13 +5,20 @@
       <div
         v-for="cell in cellCount"
         :key="'pattern-cell_' + cell"
-        class="pattern-cell bg-fourth rounded"
-        v-droppable="{ onHover: onCellHover.bind(this, cell) }"
+        :class="[
+          'pattern-cell rounded',
+          attentionClass ? 'bg-third' : 'bg-fourth',
+          { 'pulsate-fwd': attentionClass },
+        ]"
+        :style="{ 'animation-delay': cell * 0.1 + 's' }"
+        v-droppable="{
+          onHover: onCellHover.bind(this, cell),
+          onDrop: onCellDrop.bind(this, cell),
+        }"
       ></div>
       <Track
         v-for="(track, index) in currentTracks"
         :track="track"
-        :type="type"
         :key="'track_' + track.id"
         v-draggable="{
           boundaries: { leftStart: 0, leftEnd: '100%' },
@@ -44,8 +51,9 @@
 </template>
 <script>
 import { library } from '@fortawesome/fontawesome-svg-core'
-import TrackCategoryMixin from '@/assets/js/mixins/track-category.js'
+import InstrumentsMixin from '~/assets/js/mixins/instruments.js'
 import Track from './../track-selector/track.vue'
+import { mapGetters } from 'vuex'
 import {
   faDrum,
   faGuitar,
@@ -55,10 +63,10 @@ import {
 library.add(faDrum, faGuitar, faMicrophoneAlt)
 export default {
   components: { Track },
-  mixins: [TrackCategoryMixin],
+  mixins: [InstrumentsMixin],
   props: {
     title: String,
-    type: String,
+    instrument: Object,
     tracks: { type: Array, default: () => [] },
     patternLength: Number,
   },
@@ -73,8 +81,13 @@ export default {
     }
   },
   computed: {
+    ...mapGetters('tracks', ['currentInstrumentId']),
     cellCount() {
       return this.patternLength
+    },
+    attentionClass() {
+      // console.log(this.instrument,this.currentInstrumentId)
+      return this.currentInstrumentId == this.instrument?.id
     },
   },
   methods: {
@@ -87,7 +100,7 @@ export default {
           this.cellMarginLeft +
           'px',
         width:
-          (this.cellWidth + this.cellMarginLeft) * track.length -
+          (this.cellWidth + this.cellMarginLeft) * (track.length || 1) -
           this.cellMarginLeft +
           'px',
       }
@@ -96,6 +109,7 @@ export default {
     },
     onDragStart(track, evt) {
       this.currentTrack = track
+      this.$store.dispatch('tracks/setCurrentInstrumentId', this.instrument.id)
 
       const clientWidth = evt.el.clientWidth
       const mousePosX = evt.dragClickPositionX
@@ -105,11 +119,10 @@ export default {
       return {
         relativePart,
         track,
-        type: this.type,
+        instrumentId: this.instrument.id,
       }
     },
     onDragStop(track, evt) {
-      console.log('here', this.movingWorks, this.ghostTrack)
       if (!this.movingWorks || !this.ghostTrack) {
         // Reset
         this.mapTracks()
@@ -138,9 +151,12 @@ export default {
     },
 
     onCellHover(cell, evt) {
-      console.log('hey')
+      // Check if Track is of the same Track instrument
+      // e.g. it is only allowed to drag a Bass Track into Bass instrument Lane
+      if (this.instrument.id != evt.startParams?.instrumentId) return
+
       const track = evt.startParams.track
-      const type = evt.startParams.type
+
       // we have to know whicht part of the Track is currently dragged
       const relativePart = evt.startParams.relativePart
 
@@ -155,92 +171,105 @@ export default {
           })
 
         let start = cell - 1 - relativePart // -1 because its zero based
-        const trackLength = track.length || 1
+        let trackLength = track.length || 1
 
         if (start > this.cellCount - trackLength) {
           start = this.cellCount - trackLength
         }
         if (start < 0) start = 0
 
-        // Check if Track is of the same Track Type
-        // e.g. it is only allowed to drag a Bass Track into Bass Type Lane
-        if (this.type == type) {
-          const end = start + trackLength
+        const end = start + trackLength
 
-          //Overlapping
-          let overlapping = this.currentTracks.filter(
-            (x) => x.start < end && x.start + x.length > start && x != track
-          )
+        //Overlapping
+        let overlapping = this.currentTracks.filter(
+          (x) => x.start < end && x.start + x.length > start && x != track
+        )
 
-          const leftTracks = this.currentTracks.filter(
-            (x) => x.start + x.length <= start && x.id != track.id
-          )
-          const leftTracksLength = leftTracks.map((x) => x.length)
+        console.log('overlapping', overlapping)
 
-          const leftLength =
-            leftTracksLength.length > 0
-              ? leftTracksLength.reduce((a, b) => a + b)
-              : 0
-          const leftSpace = start - leftLength
+        const leftTracks = this.currentTracks.filter(
+          (x) => x.start + x.length <= start && x.id != track.id
+        )
+        const leftTracksLength = leftTracks.map((x) => x.length)
 
-          const rightTracks = this.currentTracks.filter(
-            (x) => x.start >= end && x.id != track.id
-          )
+        const leftLength =
+          leftTracksLength.length > 0
+            ? leftTracksLength.reduce((a, b) => a + b)
+            : 0
+        const leftSpace = start - leftLength
 
-          const rightTracksLength = rightTracks.map((x) => x.length)
+        const rightTracks = this.currentTracks.filter(
+          (x) => x.start >= end && x.id != track.id
+        )
 
-          const rightLength =
-            rightTracksLength.length > 0
-              ? rightTracksLength.reduce((a, b) => a + b)
-              : 0
+        const rightTracksLength = rightTracks.map((x) => x.length)
 
-          const rightSpace = this.cellCount - rightLength - end
+        const rightLength =
+          rightTracksLength.length > 0
+            ? rightTracksLength.reduce((a, b) => a + b)
+            : 0
 
-          // Does it fit?
+        const rightSpace = this.cellCount - rightLength - end
 
-          this.movingWorks = true
-          let leftCounter = leftSpace
-          let rightCounter = rightSpace
+        // Does it fit?
 
-          const movingLeftTracks = []
-          const movingRightTracks = []
+        this.movingWorks = true
+        let leftCounter = leftSpace
+        let rightCounter = rightSpace
 
-          // Sort overlapping tracks into right and left direction
-          for (let overlappingTrack of overlapping) {
-            const trackLength = overlappingTrack.length
+        const movingLeftTracks = []
+        const movingRightTracks = []
 
-            // Try put in the left direction
-            if (leftCounter - trackLength >= 0) {
-              leftCounter -= trackLength
-              movingLeftTracks.push(overlappingTrack)
+        // Sort overlapping tracks into right and left direction
+        for (let overlappingTrack of overlapping) {
+          trackLength = overlappingTrack.length
+
+          // Try put in the left direction
+          if (leftCounter - trackLength >= 0) {
+            leftCounter -= trackLength
+            movingLeftTracks.push(overlappingTrack)
+          } else {
+            // otherwise try put in the right direction
+            if (rightCounter - trackLength >= 0) {
+              rightCounter -= trackLength
+              movingRightTracks.push(overlappingTrack)
             } else {
-              // otherwise try put in the right direction
-              if (rightCounter - trackLength >= 0) {
-                rightCounter -= trackLength
-                movingRightTracks.push(overlappingTrack)
-              } else {
-                // no space: stop!
-                this.movingWorks = false
-                break
-              }
+              // no space: stop!
+              this.movingWorks = false
+              break
             }
           }
-          if (!this.movingWorks) {
-            this.ghostTrack = null
-            return
-          }
+        }
+        if (!this.movingWorks) {
+          this.ghostTrack = null
+          return
+        }
 
-          const set = new Set(movingRightTracks.map((x) => x.id))
-          this.moveLeft(movingLeftTracks, start, set)
+        const set = new Set(movingRightTracks.map((x) => x.id))
+        this.moveLeft(movingLeftTracks, start, set)
 
-          this.moveRight(movingRightTracks, end, set)
+        this.moveRight(movingRightTracks, end, set)
 
-          this.ghostTrack = {
-            ...track,
-            start,
-          }
+        this.ghostTrack = {
+          ...track,
+          start,
         }
       }
+    },
+    onCellDrop(cell, evt) {
+      if (!evt.startParams.newTrack) return
+
+      const start = this.ghostTrack.start
+
+      this.ghostTrack = null
+      this.currentTrack = null
+
+      const newTrack = {
+        ...evt.startParams.track,
+        start,
+        id: crypto.randomUUID(),
+      }
+      this.$emit('onTrackAdded', newTrack)
     },
 
     moveLeft(tracks, start, trackSetToIgnore) {
@@ -302,9 +331,9 @@ export default {
 
     mapTracks() {
       this.currentTracks = this.tracks
-        .filter((x) => x.start + x.length <= this.patternLength)
+        .filter((x) => x.start + (x.length || 1) <= this.patternLength)
         .map((x) => {
-          return { ...x }
+          return { ...x, length: x.length || 1 }
         })
 
       this.currentTracks.sort((a, b) => a.start - b.start)
@@ -360,6 +389,22 @@ $size: 94px;
     .track.ghost-track {
       transition: none;
     }
+  }
+}
+
+.pulsate-fwd {
+  animation: pulsate-fwd 1.2s ease-in-out infinite both;
+}
+
+@keyframes pulsate-fwd {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 </style>

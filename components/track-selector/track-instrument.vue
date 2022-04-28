@@ -18,7 +18,7 @@
       @click="$emit('click')"
       class="
         bg-nobel-cover
-        category
+        instrument
         rounded
         flex
         items-center
@@ -30,7 +30,7 @@
     >
       <div>
         <div class="text-center">
-          <fa :icon="getCategoryIcon(title) | fa" style="font-size: 30px"></fa>
+          <fa :icon="icon | fa" style="font-size: 30px"></fa>
         </div>
         <div>
           {{ title }}
@@ -40,32 +40,35 @@
   </div>
 </template>
 <script>
-import TrackCategoryMixin from '@/assets/js/mixins/track-category.js'
+import InstrumentsMixin from '~/assets/js/mixins/instruments.js'
 
 export default {
-  mixins: [TrackCategoryMixin],
+  mixins: [InstrumentsMixin],
   props: {
-    category: Object,
+    instrument: Object,
     index: Number,
   },
   computed: {
     style() {
-      return this.getCategoryImgStyle(this.title)
+      return this.getInstrumentImgStyle(this.instrument)
     },
     title() {
-      return this.category.title
+      return this.instrument.title
+    },
+    icon() {
+      return this.instrument.icon.src
     },
   },
 }
 </script>
 
 <style lang="scss" scoped>
-.category {
+.instrument {
   cursor: pointer;
   //   transition: all 0.2s ease;
   transition: all 0.2s ease;
 }
-.category:hover {
+.instrument:hover {
   transform: translateX(10px);
   transition: all 0.4s ease !important;
   opacity: 0.7 !important;
