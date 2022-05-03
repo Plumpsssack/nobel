@@ -1,6 +1,6 @@
 <template>
   <div class="flex line">
-    <div class="line-header self-center">{{ title }}</div>
+    <div class="line-header self-center" @click="onTitleClick">{{ title }}</div>
     <div class="flex cell-container">
       <div
         v-for="cell in cellCount"
@@ -107,6 +107,9 @@ export default {
       }
 
       return style
+    },
+    onTitleClick() {
+      this.$store.dispatch('tracks/setCurrentInstrumentId', this.instrument.id)
     },
     onDragStart(track, evt) {
       this.currentTrack = track
@@ -373,6 +376,7 @@ $size: 94px;
 
   .line-header {
     width: 200px;
+    cursor: pointer;
   }
 
   .cell-container {

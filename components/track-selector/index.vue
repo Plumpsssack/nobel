@@ -33,13 +33,14 @@
     <transition-group
       leave-active-class="leave-top"
       enter-active-class="enter-top"
+      move-class="move"
       @after-leave="onAfterTracksLeave"
       class="grid gap-3 grid-cols-3"
     >
       <div
         v-for="(track, index) in currentTracks"
-        :key="'track' + index"
-        class="relative"
+        :key="'track_' + track.id"
+        class="relative tracko"
       >
         <Track
           v-draggable="{
@@ -90,53 +91,69 @@ export default {
       currentTracks: [],
       categoriesDisappeared: false,
 
-      currentInstrument: null,
+      // currentInstrument: null,
       leaveCounter: 0,
     }
   },
+  computed: {
+    currentInstrumentId: {
+      get() {
+        return this.$store.getters['tracks/currentInstrumentId']
+      },
+      set(value) {
+        this.$store.commit('tracks/setCurrentInstrumentId', value)
+      },
+    },
+    currentInstrument() {
+      if (!this.currentInstrumentId) return null
+      return this.instruments.find(
+        (instrument) => instrument.id === this.currentInstrumentId
+      )
+    },
+  },
   methods: {
-    async onInstrumentClick(instrument) {
-      this.currentInstrument = instrument
+    onAfterTracksLeave() {},
+    onAfterCategoriesLeave() {},
+    onBackClick() {
+      this.currentInstrumentId = null
+    },
+    onInstrumentClick(instrument) {
+      this.currentInstrumentId = instrument.id
+    },
 
-      this.$store.dispatch('tracks/setCurrentInstrumentId', instrument.id)
+    async showInstruments() {
+      await this.removeOldTracks()
+      for (let i = 0; i < this.instruments.length; i++) {
+        this.currentInstruments.push(this.instruments[i])
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+    },
+    async showTracks() {
+      // removeOldInstruments
 
       while (this.currentInstruments.length > 0) {
         this.currentInstruments.pop()
         await new Promise((resolve) => setTimeout(resolve, 100))
       }
+
+      // removeOldTracks
+      await this.removeOldTracks()
+
+      //Add new tracks
+
+      for (let i = 0; i < this.currentInstrument.tracks.length; i++) {
+        this.currentTracks.push(this.currentInstrument.tracks[i])
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
     },
-    async onBackClick() {
+
+    async removeOldTracks() {
       while (this.currentTracks.length > 0) {
         this.currentTracks.pop()
         await new Promise((resolve) => setTimeout(resolve, 100))
       }
-      this.$store.dispatch('tracks/setCurrentInstrumentId', null)
     },
-    async onAfterTracksLeave() {
-      this.leaveCounter++
 
-      if (this.currentInstrument.tracks.length === this.leaveCounter) {
-        this.leaveCounter = 0
-        for (let i = 0; i < this.instruments.length; i++) {
-          this.currentInstruments.push(this.instruments[i])
-          await new Promise((resolve) => setTimeout(resolve, 100))
-        }
-      }
-    },
-    async onAfterCategoriesLeave() {
-      this.leaveCounter++
-
-      if (this.instruments.length === this.leaveCounter) {
-        this.leaveCounter = 0
-
-        this.categoriesDisappeared = true
-
-        for (let i = 0; i < this.currentInstrument.tracks.length; i++) {
-          this.currentTracks.push(this.currentInstrument.tracks[i])
-          await new Promise((resolve) => setTimeout(resolve, 100))
-        }
-      }
-    },
     onDragStart(track) {
       const instrument = this.getInstrumentOfTrack(track)
 
@@ -151,21 +168,38 @@ export default {
   mounted() {
     this.currentInstruments = [...this.instruments]
   },
+  watch: {
+    currentInstrumentId(instrumentId) {
+      if (instrumentId) {
+        this.showTracks()
+      } else {
+        this.showInstruments()
+      }
+    },
+  },
 }
 </script>
 
 <style lang="scss" scoped>
+// .move {
+//   transition: all 1s;
+//   // transition: transform 0.5s;
+// }
+// .tracko {
+//   transition: all 1s;
+// }
 .leave-right {
-  animation: slide-out-right 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53) !important;
+  animation: slide-out-right 0.1s cubic-bezier(0.55, 0.085, 0.68, 0.53) !important;
 }
 .enter-right {
-  animation: slide-in-right 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53) !important;
+  animation: slide-in-right 0.34s cubic-bezier(0.55, 0.085, 0.68, 0.53) !important;
 }
 .enter-top {
-  animation: slide-in-top 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53) !important;
+  animation: slide-in-top 0.1s cubic-bezier(0.55, 0.085, 0.68, 0.53) !important;
 }
 .leave-top {
-  animation: slide-out-top 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53) !important;
+  // position: absolute;
+  animation: slide-out-top 0.1s cubic-bezier(0.55, 0.085, 0.68, 0.53) !important;
 }
 
 .fade-in {

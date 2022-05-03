@@ -1,20 +1,7 @@
-// const { readdirSync } = require('fs')
-
-// const getDirectories = source =>
-//     readdirSync(source, { withFileTypes: true })
-//         .filter(dirent => dirent.isDirectory())
-//         .map(dirent => dirent.name)
-
-// console.log(getDirectories("."))
-
-// const fs = (process.server ? require("fs") : null)
-// console.log(fs)
 import availableInstruments from "../instruments.json";
 
 export default {
     data() {
-
-
         const instruments = [
             {
                 id: "bass",
@@ -65,7 +52,7 @@ export default {
 
         instruments.forEach(instrument => {
             instrument.tracks = availableInstrumentsMap.get(instrument.id)
-                .map((track, index) => { return { id: index, src: instrument.id + "/" + track, title: track.replace(".wav", ""), length: 1 } })
+                .map((track, index) => { return { id: instrument.id + "_" + index, src: instrument.id + "/" + track, title: track.replace(".wav", ""), length: 1 } })
         });
         console.log(instruments)
         return {
