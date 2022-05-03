@@ -38,7 +38,7 @@ export default {
       return this.getInstrumentImgStyle(this.instrument)
     },
     trackTitle() {
-      return this.track.src.replace('.wav', '')
+      return this.track.title
     },
     instrument() {
       return this.getInstrumentOfTrack(this.track)

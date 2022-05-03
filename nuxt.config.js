@@ -73,6 +73,18 @@ export default {
     ** You can extend webpack config here
     */
     extend(config, ctx) {
+
+      const { readdirSync, writeFileSync } = require('fs')
+      const { join } = require('path');
+
+      const getDirectories = source =>
+        readdirSync(source, { withFileTypes: true })
+          .filter(dirent => dirent.isDirectory())
+          .map(dirent => { return { name: dirent.name, tracks: readdirSync(join(source, dirent.name)) } })
+
+      const instruments = getDirectories("static/samples");
+
+      writeFileSync("assets/js/instruments.json", JSON.stringify(instruments))
     }
   }
 }

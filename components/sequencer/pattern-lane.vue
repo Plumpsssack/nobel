@@ -14,6 +14,7 @@
         v-droppable="{
           onHover: onCellHover.bind(this, cell),
           onDrop: onCellDrop.bind(this, cell),
+          onHoverLeave: onCellHoverLeave.bind(this, cell),
         }"
       ></div>
       <Track
@@ -21,7 +22,6 @@
         :track="track"
         :key="'track_' + track.id"
         v-draggable="{
-          boundaries: { leftStart: 0, leftEnd: '100%' },
           onStart: onDragStart.bind(this, track),
           onStop: onDragStop.bind(this, track),
         }"
@@ -124,7 +124,8 @@ export default {
       }
     },
     onDragStop(track, evt) {
-      if (!this.movingWorks || !this.ghostTrack) {
+      console.log('dragStop')
+      if (!this.movingWorks) {
         // Reset
 
         this.mapTracks()
@@ -132,24 +133,29 @@ export default {
       }
 
       this.$emit('tracksChange', this.currentTracks)
-      const start = this.ghostTrack.start
+
+      if (this.ghostTrack) {
+        const start = this.ghostTrack.start
+        track.start = start
+
+        const refresh = track.start == start
+
+        // Track has to be refreshed, otherwise it would stay at the old position
+        if (refresh) {
+          // track.start = (start + 1) % this.cellCount
+          // this.$nextTick(() => {
+          //   this.currentTracks.filter((x) => x.id == track.id)[0].start = start
+          // })
+        }
+
+        this.ghostTrack = null
+      }
 
       if (evt.el) {
         evt.el.style.top = '0'
       }
-      this.ghostTrack = null
+
       this.currentTrack = null
-
-      const refresh = track.start == start
-      track.start = start
-
-      // Track has to be refreshed, otherwise it would stay at the old position
-      if (refresh) {
-        // track.start = (start + 1) % this.cellCount
-        // this.$nextTick(() => {
-        //   this.currentTracks.filter((x) => x.id == track.id)[0].start = start
-        // })
-      }
     },
 
     onCellHover(cell, evt) {
@@ -256,8 +262,12 @@ export default {
         }
       }
     },
+    onCellHoverLeave(cell, evt) {
+      this.ghostTrack = null
+      console.log(this.ghostTrack)
+    },
     onCellDrop(cell, evt) {
-      if (!evt.startParams.newTrack) return
+      if (!evt.startParams.newTrack || !this.ghostTrack) return
 
       const start = this.ghostTrack.start
 
