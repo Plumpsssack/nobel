@@ -194,8 +194,6 @@ export default {
 
     onNextNote(note) {
       this.currentNote = note
-
-      // console.log(this.currentNote)
     },
   },
   mounted() {

@@ -54,7 +54,6 @@ export default {
             instrument.tracks = availableInstrumentsMap.get(instrument.id)
                 .map((track, index) => { return { id: instrument.id + "_" + index, src: instrument.id + "/" + track, title: track.replace(".wav", ""), length: 1 } })
         });
-        console.log(instruments)
         return {
             instruments
         }
