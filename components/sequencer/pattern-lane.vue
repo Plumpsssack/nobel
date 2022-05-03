@@ -127,7 +127,6 @@ export default {
       }
     },
     onDragStop(track, evt) {
-      console.log('dragStop')
       if (!this.movingWorks) {
         // Reset
 
@@ -267,7 +266,6 @@ export default {
     },
     onCellHoverLeave(cell, evt) {
       this.ghostTrack = null
-      console.log(this.ghostTrack)
     },
     onCellDrop(cell, evt) {
       if (!evt.startParams.newTrack || !this.ghostTrack) return
