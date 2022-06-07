@@ -1,6 +1,6 @@
 # nobel
 
-> My fantabulous Nuxt.js project
+> Website for artist Nobel 
 
 ## Build Setup
 
